@@ -1,8 +1,9 @@
+require 'gollum/elasticsearch/version'
 require 'sinatra/base'
 require 'sinatra/namespace'
 require 'sinatra/reloader'
 
-module GollumElasticsearch
+module Gollum::Elasticsearch
 
   class Middleware < Sinatra::Base
 

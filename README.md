@@ -20,7 +20,19 @@ Based on gollum/gollum#1768.
 
 ## Installation
 
-TODO: Explain how to install. Probably either `gem 'gollum-elasticsearch', '~> LATEST_VERSION'` in your Gemfile or `gem install gollum-elasticsearch` globally.
+Add this line to your application's Gemfile:
+
+```ruby
+gem 'gollum-elasticsearch', '~> LATEST_VERSION'
+```
+
+Then execute `bundle`.
+
+Or install the gem yourself:
+
+```shell
+$ gem install gollum-elasticsearch
+```
 
 
 ## Configuration
@@ -30,14 +42,30 @@ TODO: Explain how to active that plugin in Gollum. Hopefully just adding a line 
 
 ## Usage
 
-TODO: Explain how to use the plugin. The design goal is that installing this gem and calling a single setup method in your gollum config is enough to "hook" into Gollum in the appropriate places.
+This plugin is implemented as Rack middleware that overrides the `/gollum/search` request path. This means you must run Gollum as a Rack app via `config.ru` and inject this plugin _before_ Gollum.
+
+```ruby
+# config.ru
+
+require_relative 'gollum-elasticsearch'
+use Gollum::Elasticsearch::Middleware
+
+require 'gollum/app'
+Precious::App.set(:gollum_path, '/path/to/your/wiki/repo/dir')
+run Precious::App
+```
+
+This plugin looks for an `ELASTICSEARCH_URL` to establish a connection to Elasticsearch. This can be defined in the above config.ru file, or in the runtime environment for your server. In development, this is set by the `docker-compose.yml` file to point to the elasticsearch Docker container.
+
+Please check [config.ru](config.ru) for example usage. Further documentation about [launching Gollum via Rack](https://github.com/gollum/gollum/wiki/Gollum-via-Rack) is available in [Gollum's own wiki](https://github.com/gollum/gollum/wiki/)
+
 
 
 ## Contributing
 
 ### Code of Conduct
 
-Please note that this project is released with a [code of conduct](CODE_OF_CONDUCT.md). By participating in this project you agree to abide by its terms.
+Everyone interacting in the Gollum-Elasticsearch project’s codebases, issue trackers, chat rooms and mailing lists is expected to follow the [code of conduct](https://github.com/beporter/gollum-elasticsearch/blob/master/CODE_OF_CONDUCT.md).
 
 
 ### Getting Help or Reporting Issues
@@ -53,7 +81,7 @@ TODO: Better details.
   * The authors have little time to maintain this project. Your contributions are invited, but we wish to not waste anyone's time. A quick conversation to determine alignment and fit is usually a good investment.
 * If the contribution is a good fit, clone the repo, start a topic branch, and open a pull request.
 
-Workflow:
+#### Workflow
 
 * Clone the repository.
 * Run `docker-compose up` to launch the development environment, which contains a ruby container running gollum and a test wiki, and an Elasticsearch container.
@@ -65,18 +93,17 @@ Workflow:
   * You can override the exposed port by creating a local `.env` file and placing `ELASTICSEARCH_PORT=4568` in it.
 * All normal ruby/bundler commands should be _prefixed_ with `docker compose exec gollum YOUR COMMAND HERE`.
 
-Things to check:
-
-* The test suite should continue to pass.
-* Rubocop should emit no warnings or errors.
-
-
-### Testing
+#### Testing
 
 It is recommended to run the test suite inside the provided Docker Compose environment.
 
-* `docker-compose ruby rspec`
-* `docker-compose ruby rubocop`
+* `docker-compose gollum bundle exec rspec` - The test suite should continue to pass.
+* `docker-compose gollum bundle exec rubocop` - Rubocop should emit no warnings or errors.
+
+
+#### Releasing
+
+To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
 
 
 ## Copyright & License

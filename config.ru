@@ -1,11 +1,11 @@
 # This config file is injected into the local Docker Compose environment
-# for the purposes of engaging the GollumElasticsearch plugin as middleware
+# for the purposes of engaging the Gollum::Elasticsearch::Middleware plugin
 # in front of the Gollum app.
 
 $stderr.puts '!!! Rack config engaged !!!'
 
 require_relative 'lib/gollum-elasticsearch.rb'
-use GollumElasticsearch::Middleware
+use Gollum::Elasticsearch::Middleware
 
 require 'gollum/app'
 wiki_path = '/app/test/examples/lotr.git'
