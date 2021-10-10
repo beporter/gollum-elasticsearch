@@ -33,7 +33,7 @@ Gem::Specification.new do |spec|
   spec.require_paths = ['lib']
 
   # Dependencies
-  spec.add_dependency 'searchkick', '~> 4.6.0'
+  spec.add_dependency 'elasticsearch', '~> 7.15'
 
   spec.add_development_dependency 'bundler', '~> 2.0'
   spec.add_development_dependency 'dotenv', '~> 2.7'
