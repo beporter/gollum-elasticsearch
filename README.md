@@ -52,9 +52,23 @@ TODO: Better details.
 * [Create an issue](https://github.com/beporter/gollum-elasticsearch/issues) to propose and discuss the contribution.
   * The authors have little time to maintain this project. Your contributions are invited, but we wish to not waste anyone's time. A quick conversation to determine alignment and fit is usually a good investment.
 * If the contribution is a good fit, clone the repo, start a topic branch, and open a pull request.
-  * Clone the repository.
-  * Run `docker-compose up` to launch the development environment, which contains a ruby container running gollum and a test wiki, and an Elasticsearch container.
-  * The test suite should continue to pass.
+
+Workflow:
+
+* Clone the repository.
+* Run `docker-compose up` to launch the development environment, which contains a ruby container running gollum and a test wiki, and an Elasticsearch container.
+* Visit http://localhost:4567 to check the running copy of Gollum with this plugin injected.
+  * Changes to the code in this plugin should be reloaded automatically.
+  * You can override the exposed port by creating a local `.env` file and placing `GOLLUM_PORT=4568` in it.
+  * You can confirm that the gollum container can reach the elasticsearch container by running `docker compose run gollum bash`, then `curl $ELASTICSEARCH_URL/_cluster/state?pretty`.
+* Visit http://localhost:9200/ to check the Elasticsearch instance.
+  * You can override the exposed port by creating a local `.env` file and placing `ELASTICSEARCH_PORT=4568` in it.
+* All normal ruby/bundler commands should be _prefixed_ with `docker compose exec gollum YOUR COMMAND HERE`.
+
+Things to check:
+
+* The test suite should continue to pass.
+* Rubocop should emit no warnings or errors.
 
 
 ### Testing

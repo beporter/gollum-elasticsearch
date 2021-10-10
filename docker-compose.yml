@@ -1,0 +1,52 @@
+# Development environment. Starts an elasticsearch container and a gollum wiki instance.
+version: "3.8"
+services:
+  # Ref: https://www.elastic.co/guide/en/elasticsearch/reference/7.14/docker.html
+  elasticsearch:
+    image: elasticsearch:7.14.1
+    environment:
+      node.name: es01
+      bootstrap.memory_lock: 'true'
+      discovery.type: single-node
+      logger.org.elasticsearch: WARN
+      xpack.security.enabled: 'false'
+      ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - es-data:/usr/share/elasticsearch/data
+    ports:
+      - ${ELASTICSEARCH_PORT:-9200}:9200
+
+  # Ref: https://hub.docker.com/r/gollumwiki/gollum/tags
+  gollum:
+    image: gollumwiki/gollum
+    environment:
+      BUNDLE_PATH: /bundler
+      RACK_ENV: development
+      ELASTICSEARCH_URL: http://elasticsearch:${ELASTICSEARCH_PORT:-9200}/
+    working_dir: /plugin
+    entrypoint: ''
+    command: >-
+      sh -c '
+        (bundle check || bundle install) \
+        && bundle exec rackup --host 0.0.0.0 --port 80
+      '
+    # ^^ See `config.ru` ^^
+    ports:
+      - ${GOLLUM_PORT:-4567}:80
+    volumes:
+      - .:/plugin # Map our plugin dev folder into the container.
+      - bundler-cache:/bundler # Cache gems between container runs.
+    depends_on:
+      - elasticsearch
+
+volumes:
+  # Use separate volume for gem packages to speed up re-builds.
+  # Clear with: `docker volume rm $(basename $PWD)_bundler-cache`
+  bundler-cache: {}
+  # Store Elasticsearch data between docker runs.
+  # Clear with: `docker volume rm $(basename $PWD)_es-data`
+  es-data: {}
