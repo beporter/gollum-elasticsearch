@@ -2,6 +2,8 @@
 
 Aims to integrate Elasticsearch features into the Gollum wiki project.
 
+:warning: This is all very much pre-release! The current version doesn't actually do anything yet.
+
 * [ ] Improved relevancy of search results.
 * [ ] Ability to tune search results for specific topic domains.
 * [ ] Find-as-you-type search results.
