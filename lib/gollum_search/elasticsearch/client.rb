@@ -1,6 +1,6 @@
 require 'elasticsearch'
 
-module Gollum
+module GollumSearch
   module Elasticsearch
     class Client
 

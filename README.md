@@ -1,6 +1,6 @@
-# Gollum + Elasticsearch
+# Gollum + Search
 
-Aims to integrate Elasticsearch features into the Gollum wiki project.
+Aims to improve the [Gollum wiki project](https://github.com/gollum/gollum)'s default `git grep`-based searching by integrating Elasticsearch features. A secondary goal is to allow for additional search services to be plugged into Gollum via this one.
 
 :warning: This is all very much pre-release! The current version doesn't actually do anything yet.
 
@@ -9,6 +9,7 @@ Aims to integrate Elasticsearch features into the Gollum wiki project.
 * [ ] Find-as-you-type search results.
 * [ ] Perhaps improved search performance in very large wikis(?) (Should be tested!)
 * [ ] FUTURE: Per-user search conversion tracking.
+* [ ] FUTURE: Make this project pluggable to support additional search backends.
 
 Based on gollum/gollum#1768.
 
@@ -25,7 +26,7 @@ Based on gollum/gollum#1768.
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'gollum-elasticsearch', '~> LATEST_VERSION'
+gem 'gollum_search', '~> LATEST_VERSION'
 ```
 
 Then execute `bundle`.
@@ -33,7 +34,7 @@ Then execute `bundle`.
 Or install the gem yourself:
 
 ```shell
-$ gem install gollum-elasticsearch
+$ gem install gollum_search
 ```
 
 
@@ -49,8 +50,8 @@ This plugin is implemented as Rack middleware that overrides the `/gollum/search
 ```ruby
 # config.ru
 
-require_relative 'gollum-elasticsearch'
-use Gollum::Elasticsearch::Middleware
+require 'gollum_search'
+use GollumSearch::Middleware
 
 require 'gollum/app'
 Precious::App.set(:gollum_path, '/path/to/your/wiki/repo/dir')
@@ -67,19 +68,19 @@ Please check [config.ru](config.ru) for example usage. Further documentation abo
 
 ### Code of Conduct
 
-Everyone interacting in the Gollum-Elasticsearch project’s codebases, issue trackers, chat rooms and mailing lists is expected to follow the [code of conduct](https://github.com/beporter/gollum-elasticsearch/blob/master/CODE_OF_CONDUCT.md).
+Everyone interacting in the gollum_search project’s codebases, issue trackers, chat rooms and mailing lists is expected to follow the [code of conduct](https://github.com/beporter/gollum_search/blob/master/CODE_OF_CONDUCT.md).
 
 
 ### Getting Help or Reporting Issues
 
-[Create an issue](https://github.com/beporter/gollum-elasticsearch/issues).
+[Create an issue](https://github.com/beporter/gollum_search/issues).
 
 TODO: Better details.
 
 
 ### Development
 
-* [Create an issue](https://github.com/beporter/gollum-elasticsearch/issues) to propose and discuss the contribution.
+* [Create an issue](https://github.com/beporter/gollum_search/issues) to propose and discuss the contribution.
   * The authors have little time to maintain this project. Your contributions are invited, but we wish to not waste anyone's time. A quick conversation to determine alignment and fit is usually a good investment.
 * If the contribution is a good fit, clone the repo, start a topic branch, and open a pull request.
 
@@ -92,7 +93,7 @@ TODO: Better details.
   * You can override the exposed port by creating a local `.env` file and placing `GOLLUM_PORT=4568` in it.
   * You can confirm that the gollum container can reach the elasticsearch container by running `docker compose run gollum bash`, then `curl $ELASTICSEARCH_URL/_cluster/state?pretty`.
 * Visit http://localhost:9200/ to check the Elasticsearch instance.
-  * You can override the exposed port by creating a local `.env` file and placing `ELASTICSEARCH_PORT=4568` in it.
+  * You can override the exposed port by creating a local `.env` file and placing `ELASTICSEARCH_PORT=9201` in it.
 * All normal ruby/bundler commands should be _prefixed_ with `docker compose exec gollum YOUR COMMAND HERE`.
 
 #### Testing
