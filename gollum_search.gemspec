@@ -34,6 +34,7 @@ Gem::Specification.new do |spec|
 
   # Dependencies
   spec.add_dependency 'elasticsearch', '~> 7.15'
+  #spec.add_dependency 'elasticsearch-persistence', '~> 7.2'
 
   spec.add_development_dependency 'bundler', '~> 2.0'
   spec.add_development_dependency 'dotenv', '~> 2.7'
