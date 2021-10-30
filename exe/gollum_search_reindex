@@ -1,0 +1,17 @@
+#!/usr/bin/env ruby
+# Recreates a full search index for the wiki git repo provided
+# as a file path as the first argument.
+
+require 'bundler/setup'
+require 'dotenv/load'
+require 'gollum_search/indexer'
+
+abort 'Please provide the filesystem path to your wiki git repository as the first argument.' unless ARGV.length == 1
+wiki_path = ARGV[0]
+
+indexer = GollumSearch::Indexer.new(wiki_path)
+
+begin
+  indexer.reindex()
+  #TODO: Rescue errors as appropriate.
+end
