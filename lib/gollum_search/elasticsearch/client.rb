@@ -12,7 +12,10 @@ module GollumSearch
       def self.connection()
         @conn ||= ::Elasticsearch::Client.new(
           url: ENV.fetch('ELASTICSEARCH_URL') { raise 'You must define ELASTICSEARCH_URL in your environment.' },
-          transport_options: {request: {timeout: timeout}, headers: {content_type: 'application/json'}},
+          transport_options: {
+            request: {timeout: timeout},
+            headers: {content_type: 'application/json'},
+          },
         )
       end
 
