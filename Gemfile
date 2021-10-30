@@ -3,5 +3,5 @@
 source 'https://rubygems.org'
 git_source(:github) { |repo_name| "https://github.com/#{repo_name}" }
 
-# Gem's dependencies specified in `gollum-elasticsearch.gemspec`.
+# Gem's dependencies specified in `gollum_search.gemspec`.
 gemspec

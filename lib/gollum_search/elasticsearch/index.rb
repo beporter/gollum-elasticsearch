@@ -1,6 +1,6 @@
-require 'gollum/elasticsearch/client'
+require 'gollum_search/elasticsearch/client'
 
-module Gollum
+module GollumSearch
   module Elasticsearch
     class Index
       def self.for_wiki(wiki)

@@ -1,6 +1,6 @@
-RSpec.describe Gollum::Elasticsearch do
+RSpec.describe GollumSearch do
   it 'has a version number' do
-    expect(Gollum::Elasticsearch::VERSION).not_to be nil
+    expect(GollumSearch::VERSION).not_to be nil
   end
 
   it 'overrides the /gollum/search path' do
