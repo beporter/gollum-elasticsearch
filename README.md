@@ -54,11 +54,23 @@ This plugin is implemented as Rack middleware that overrides the `/gollum/search
 
 # Engage the `/gollum/search` request override.
 require 'gollum_search'
-use GollumSearch::Middleware
+#use GollumSearch::Middleware
 
 # Trigger "live" updates to the index as pages are edited.
 Gollum::Hook.register(:post_commit, :update_search_index) do |committer, sha1|
   GollumSearch::Indexer.hook(committer, sha1)
+end
+
+# Monkey-patch `Gollum::Wiki.search` to use GollumSearch::Indexer.search instead.
+# This is (arguably) cleaner than overriding the entire route with Sinatra middleware.
+# TODO: Move this to `GollumSearch::included` to patch automatically ?
+module Gollum
+  class Wiki
+    def search(query)
+      $stderr.puts "Query = #{query}"
+      GollumSearch::Indexer.search(query)
+    end
+  end
 end
 
 # Load and run Gollum (as normal).

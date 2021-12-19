@@ -39,6 +39,11 @@ module GollumSearch
         changed_paths.map { |path| page(w.page(path)) }
       end
 
+      # Input and output must mimic `Gollum::Wiki.search(query)`
+      def search(query)
+        backend.search(query)
+      end
+
       private
 
       # Define the data to index in the search database as a tuple containing

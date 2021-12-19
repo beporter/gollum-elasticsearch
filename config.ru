@@ -6,7 +6,18 @@
 $stderr.puts '!!! Rack config engaged !!!'
 
 require_relative 'lib/gollum_search.rb'
-use GollumSearch::Middleware
+#use GollumSearch::Middleware
+
+# Monkey-patch `Gollum::Wiki.search` to use GollumSearch::Indexer.search instead.
+# This is (arguably) cleaner than overriding the entire route with Sinatra middleware.
+module Gollum
+  class Wiki
+    def search(query)
+      $stderr.puts "Query = #{query}"
+      GollumSearch::Indexer.search(query)
+    end
+  end
+end
 
 Gollum::Hook.register(:post_commit, :update_search_index) do |committer, sha1|
   GollumSearch::Indexer.hook(committer, sha1)
