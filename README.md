@@ -52,6 +52,7 @@ This plugin is implemented as Rack middleware that overrides the `/gollum/search
 ```ruby
 # config.ru
 
+# Engage the `/gollum/search` request override.
 require 'gollum_search'
 use GollumSearch::Middleware
 
@@ -60,8 +61,10 @@ Gollum::Hook.register(:post_commit, :update_search_index) do |committer, sha1|
   GollumSearch::Indexer.hook(committer, sha1)
 end
 
+# Load and run Gollum (as normal).
 require 'gollum/app'
 Precious::App.set(:gollum_path, '/path/to/your/wiki/repo/dir')
+Precious::App.set(:wiki_options, { your_wiki_options })
 run Precious::App
 ```
 

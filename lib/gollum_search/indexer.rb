@@ -29,25 +29,14 @@ module GollumSearch
       end
 
       def page(p)
-        @@backend.save(*payload(p))
+        backend.save(*payload(p))
       end
 
       def hook(committer, sha1)
-        wiki = committer.wiki
-        committer.diff.deltas
-          .map { |delta| [ delta.new_file[:path], delta.old_file[:path] ] }
-          .flatten
-          .uniq
-          .map { |path| page(wiki.page(path)) }
-
-        # Precious::App.settings.gollum_path
-        # GollumSearch::Indexer.page(committer.index.tree.TODO_GET_PAGES_MODIFIED)
-        # wiki.commit_for('HEAD').commit.diff.deltas.each do |delta|
-        #   backend.update(wiki.page(delta.new_file[:path]))
-        #   backend.update(wiki.page(delta.old_file[:path]))
-        # end
-
-        # wiki = Gollum::Wiki.new('wiki', { ref: 'main'})
+        w = committer.wiki
+        deltas = committer.parents[0].commit.diff.deltas
+        changed_paths = deltas.map { |delta| [ delta.new_file[:path], delta.old_file[:path] ] }.flatten.uniq
+        changed_paths.map { |path| page(w.page(path)) }
       end
 
       private
@@ -56,15 +45,15 @@ module GollumSearch
       # the "ID" for the page and all additional "fields".
       def payload(page)
         [
-          page.dig('url_path'),
+          page.url_path,
           {
-            path: page.dig('url_path'),
-            title: page.dig('title') || '',
-            toc: page.dig('toc_data') || '',
-            tags: page.dig('metadata', 'tags') || [],
-            version_short: page.dig('version_short') || '',
-            format: page.dig('format') || '',
-            content: page.dig('text_data') || '',
+            path: page.url_path,
+            title: page.title || '',
+            toc: page.toc_data || '',
+            tags: page.metadata.fetch('tags', []),
+            version_short: page.version_short || '',
+            format: page.format || '',
+            content: page.text_data || '',
           }
         ]
       end
