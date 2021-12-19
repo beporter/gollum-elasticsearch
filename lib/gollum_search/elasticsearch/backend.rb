@@ -21,15 +21,13 @@ module GollumSearch
         connection.search(query)
       end
 
-      private
-
       def connection()
-        @conn ||= ::Elasticsearch::Client.new(
+        @conn ||= ::Elasticsearch::Client.new(**{
           url: ENV.fetch('ELASTICSEARCH_URL') { raise 'You must define ELASTICSEARCH_URL in your environment.' },
           transport_options: {
             request: {timeout: 10},
             headers: {content_type: 'application/json'},
-          }.merge(options),
+          }}.merge(@options) {|key, a, b| a.merge(b) },
         )
       end
 
