@@ -2,14 +2,18 @@ require 'elasticsearch'
 
 module GollumSearch
   module Elasticsearch
-    module Backend
+    class Backend
 
-      def save(page)
+      def initialize(options = {})
+        @options = options
+      end
+
+      def save(id, attributes)
         connection.index(
           index: 'wiki',
           type: 'page',
-          id: page.name,
-          body: payload(page),
+          id: id,
+          body: attributes,
         )
       end
 
@@ -25,20 +29,8 @@ module GollumSearch
           transport_options: {
             request: {timeout: 10},
             headers: {content_type: 'application/json'},
-          },
+          }.merge(options),
         )
-      end
-
-      def payload(page)
-        {
-          path: page.url_path,
-          title: page.title,
-          toc: page.toc_data,
-          tags: page.metadata.fetch('tags', []),
-          version_short: page.version_short,
-          format: page.format,
-          content: page.text_data,
-        }
       end
 
     end

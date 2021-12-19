@@ -1,17 +1,22 @@
 #!/usr/bin/env ruby
-# Recreates a full search index for the wiki git repo provided
-# as a file path as the first argument.
+# Command line convenience script to reindex the entire wiki.
+# Pass full filesystem path to the git working copy folder as first arg.
+# Pass the git branch name to use as optional second arg. (Defaults to "master".)
+#
+# Run `bundle binstubs gollum_search` to generate `gollum_search_reindex`
+#
+# Example:
+#   /home/your_user/gollum/bin/gollum_search_reindex /path/to/wiki main
 
 require 'bundler/setup'
 require 'dotenv/load'
-require 'gollum_search/indexer'
+require 'gollum_search'
+require 'gollum/app'
 
-abort 'Please provide the filesystem path to your wiki git repository as the first argument.' unless ARGV.length == 1
-wiki_path = ARGV[0]
+abort 'Please provide the filesystem gollum_path to your wiki git working copy as the first argument.' unless ARGV.length == 1
+gollum_path = ARGV[0]
+ref = ARGV[1] || 'master'
 
-indexer = GollumSearch::Indexer.new(wiki_path)
+wiki = Gollum::Wiki.new(gollum_path, { ref: ref })
 
-begin
-  indexer.reindex()
-  #TODO: Rescue errors as appropriate.
-end
+GollumSearch::Indexer.reindex(wiki)

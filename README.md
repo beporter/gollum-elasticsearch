@@ -45,7 +45,7 @@ TODO: Explain how to active that plugin in Gollum. Hopefully just adding a line 
 
 ## Usage
 
-Creating (or recreating) an index can be done from the command line using `bundle exec gollum_search_reindex /path/to/your/wiki`.
+Creating (or recreating) an index can be done from the command line using `bundle exec gollum_search_reindex /path/to/your/wiki branch_name`.
 
 This plugin is implemented as Rack middleware that overrides the `/gollum/search` request path. This means you must run Gollum as a Rack app via `config.ru` and inject this plugin _before_ Gollum.
 
@@ -54,6 +54,11 @@ This plugin is implemented as Rack middleware that overrides the `/gollum/search
 
 require 'gollum_search'
 use GollumSearch::Middleware
+
+# Trigger "live" updates to the index as pages are edited.
+Gollum::Hook.register(:post_commit, :update_search_index) do |committer, sha1|
+  GollumSearch::Indexer.hook(committer, sha1)
+end
 
 require 'gollum/app'
 Precious::App.set(:gollum_path, '/path/to/your/wiki/repo/dir')
