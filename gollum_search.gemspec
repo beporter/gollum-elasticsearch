@@ -39,6 +39,8 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'bundler', '~> 2.0'
   spec.add_development_dependency 'dotenv', '~> 2.7'
   spec.add_development_dependency 'gollum', '~> 5.2'
+  spec.add_development_dependency 'guard', '~> 2.18'
+  spec.add_development_dependency 'guard-rack', '~> 2.2'
   spec.add_development_dependency 'rack-test', '~> 1.1'
   spec.add_development_dependency 'rake', '~> 10.0'
   spec.add_development_dependency 'rspec', '~> 3.10'
