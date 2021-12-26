@@ -1,4 +1,6 @@
 require 'elasticsearch'
+require 'elasticsearch/dsl'
+include Elasticsearch::DSL
 
 module GollumSearch
   module Elasticsearch
@@ -21,15 +23,13 @@ module GollumSearch
         #TODO more
       end
 
-      def search(query)
-        request = {
-          q: query,
-          body: {
-            # facets: {
-            #   title: query,
-            # },
-          },
-        }
+      def search(query_string)
+        request = search {
+          q query_string
+          body {
+
+          }
+        }.to_hash
 
         #request = {body: { query: { match: query } } }
         # TODO: Split "exact terms": https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-wildcard-query.html
