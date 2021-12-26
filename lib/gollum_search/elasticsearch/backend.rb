@@ -17,8 +17,19 @@ module GollumSearch
         )
       end
 
+      def delete(id)
+        #TODO more
+      end
+
       def search(query)
-        request = { q: query }
+        request = {
+          q: query,
+          body: {
+            # facets: {
+            #   title: query,
+            # },
+          },
+        }
 
         #request = {body: { query: { match: query } } }
         # TODO: Split "exact terms": https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-wildcard-query.html
@@ -37,10 +48,17 @@ module GollumSearch
       def format(hit)
         {
           count: 1, # TODO: Extract from `hit`
-          name: hit.fetch('_id'),
+          name: hit.dig('_source', 'title'),
           filename_count: 0, # TODO: Extract from document `id` from `hit.`
           context: hit.dig('_source', 'content'), # TODO: Extract from `hit`
         }
+      end
+
+      def wiki()
+        @wiki ||= Gollum::Wiki.new(
+          Precious::App.settings.gollum_path,
+          Precious::App.settings.wiki_options
+        )
       end
 
 

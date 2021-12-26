@@ -12,9 +12,14 @@ require_relative 'lib/gollum_search.rb'
 # This is (arguably) cleaner than overriding the entire route with Sinatra middleware.
 module Gollum
   class Wiki
+    alias search_original search
     def search(query)
       $stderr.puts "Query = #{query}"
-      GollumSearch::Indexer.search(query)
+      begin
+        GollumSearch::Indexer.search(query)
+      rescue Faraday::Error # Fall back on any error to native Gollum grep search.
+        return search_original(query)
+      end
     end
   end
 end
@@ -29,3 +34,4 @@ wiki_options = {}
 Precious::App.set(:gollum_path, wiki_path)
 Precious::App.set(:wiki_options, wiki_options)
 run Precious::App
+#test2
