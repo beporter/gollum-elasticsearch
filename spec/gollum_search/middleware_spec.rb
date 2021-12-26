@@ -1,8 +1,4 @@
-RSpec.describe GollumSearch do
-  it 'has a version number' do
-    expect(GollumSearch::VERSION).not_to be nil
-  end
-
+RSpec.describe GollumSearch::Middleware do
   it 'overrides the /gollum/search path' do
     get '/gollum/search'
     expect(last_response).to be_ok

@@ -40,25 +40,47 @@ $ gem install gollum_search
 
 ## Configuration
 
-TODO: Explain how to active that plugin in Gollum. Hopefully just adding a line to your gouum config file.
+TODO: Explain how to active that plugin in Gollum. Hopefully just adding a line to your gollum config file.
 
 
 ## Usage
+
+Creating (or recreating) an index can be done from the command line using `bundle exec gollum_search_reindex /path/to/your/wiki branch_name`.
 
 This plugin is implemented as Rack middleware that overrides the `/gollum/search` request path. This means you must run Gollum as a Rack app via `config.ru` and inject this plugin _before_ Gollum.
 
 ```ruby
 # config.ru
 
+# Engage the `/gollum/search` request override.
 require 'gollum_search'
-use GollumSearch::Middleware
+#use GollumSearch::Middleware
 
+# Trigger "live" updates to the index as pages are edited.
+Gollum::Hook.register(:post_commit, :update_search_index) do |committer, sha1|
+  GollumSearch::Indexer.hook(committer, sha1)
+end
+
+# Monkey-patch `Gollum::Wiki.search` to use GollumSearch::Indexer.search instead.
+# This is (arguably) cleaner than overriding the entire route with Sinatra middleware.
+# TODO: Move this to `GollumSearch::included` to patch automatically ?
+module Gollum
+  class Wiki
+    def search(query)
+      $stderr.puts "Query = #{query}"
+      GollumSearch::Indexer.search(query)
+    end
+  end
+end
+
+# Load and run Gollum (as normal).
 require 'gollum/app'
 Precious::App.set(:gollum_path, '/path/to/your/wiki/repo/dir')
+Precious::App.set(:wiki_options, { your_wiki_options })
 run Precious::App
 ```
 
-This plugin looks for an `ELASTICSEARCH_URL` to establish a connection to Elasticsearch. This can be defined in the above config.ru file, or in the runtime environment for your server. In development, this is set by the `docker-compose.yml` file to point to the elasticsearch Docker container.
+This plugin uses Elasticsearch by default and therefore looks for an `ELASTICSEARCH_URL` to establish a connection to Elasticsearch. This can be defined in the above config.ru file, or in the runtime environment for your server. In development, this is set by the `docker-compose.yml` file to point to the elasticsearch Docker container.
 
 Please check [config.ru](config.ru) for example usage. Further documentation about [launching Gollum via Rack](https://github.com/gollum/gollum/wiki/Gollum-via-Rack) is available in [Gollum's own wiki](https://github.com/gollum/gollum/wiki/)
 
@@ -96,6 +118,12 @@ TODO: Better details.
   * You can override the exposed port by creating a local `.env` file and placing `ELASTICSEARCH_PORT=9201` in it.
 * All normal ruby/bundler commands should be _prefixed_ with `docker compose exec gollum YOUR COMMAND HERE`.
 
+To check the local docker elasticsearch index:
+
+* Run `docker-compose exec gollum exe/gollum_search_reindex /app/test/examples/lotr.git`
+* Visit: http://localhost:9200/_search?q=bilbo or ?q=ring
+
+
 #### Testing
 
 It is recommended to run the test suite inside the provided Docker Compose environment.
@@ -114,3 +142,19 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 Copyright &copy; 2021 Brian Porter.
 
 This software is released under the [MIT License](LICENSE).
+
+
+## TODO
+
+- Write a search method that returns results compatible with Wiki.search() results.
+- Figure out how to monkeypatch our search method on top of `Gollum::Wiki.search`: https://github.com/gollum/gollum-lib/blob/master/lib/gollum-lib/wiki.rb#L492 (This would be "easier" and less invasive than overriding the /gollum/search route.)
+- Make this plugin able to register Gollum hooks for after_commit (to write the updated page into the ES index) and `Gollum::Hook.register(:post_wiki_initialize, :hook_id)` (we can save a reference to that wiki instance for use), and update "installation" docs for how to do that in your own Gollum wiki.
+- Register our own sinatra routes for search-as-you-type.
+- Override the necessary Mustache templates to offer search as you type.
+  - Pull in the **minimum** necessary Javascript to query the new route and use the results.
+
+### Refs
+- [Using raw Elasticsearch client](https://rubydoc.info/gems/elasticsearch-api)
+- [gollumb-lib's Page class](https://github.com/gollum/gollum-lib/blob/master/lib/gollum-lib/page.rb)
+- [ES Repository pattern](https://github.com/elastic/elasticsearch-rails/tree/main/elasticsearch-persistence#the-repository-pattern)
+- [Example ES Sinatra app](https://github.com/elastic/elasticsearch-rails/blob/main/elasticsearch-persistence/examples/notes/application.rb)
