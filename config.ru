@@ -5,6 +5,8 @@
 
 $stderr.puts '!!! Rack config engaged !!!'
 
+use Rack::Reloader
+
 # Engage the GolumSearch plugin.
 require_relative 'lib/gollum_search.rb'
 #use GollumSearch::Middleware
