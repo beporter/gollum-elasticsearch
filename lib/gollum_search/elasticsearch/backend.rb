@@ -30,7 +30,7 @@ module GollumSearch
         # Append an `add` action for @reindex_name, aliased to `pages`
         actions << { add: { index: @reindex_name, alias: INDEX_ALIAS } }
 
-    pp actions
+pp actions
 
         # Clear the @reindex_name.
         @reindex_name = nil
@@ -54,7 +54,7 @@ module GollumSearch
 
       def search(query_string)
         request = {
-          q: query,
+          q: query_string,
           body: {
             # facets: {
             #   title: query,
@@ -69,11 +69,11 @@ module GollumSearch
 
         results = connection.search(index: 'wiki', **request)
 
-        pp results
+pp results
         hits = results.dig('hits', 'hits') || []
         payload = hits.map {|hit| format(hit)}
 
-        [payload, [query]]
+        [payload, [query_string]]
       end
 
       def format(hit)
