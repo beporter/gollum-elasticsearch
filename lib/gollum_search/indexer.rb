@@ -14,7 +14,7 @@ module GollumSearch
       end
 
       def backend=(backend)
-        %w[save search].each do |method|
+        %w[save delete search before_reindex after_reindex].each do |method|
           raise "Backend does not respond to #{method}." unless backend.respond_to?(method)
         end
 
@@ -23,9 +23,11 @@ module GollumSearch
 
       def reindex(wiki)
         raise "Not a Gollum::Wiki instance: #{wiki.to_s}" unless wiki.is_a?(Gollum::Wiki)
+        backend.before_reindex(wiki.path)
         wiki.pages.map do |p|
           page(p)
         end
+        backend.after_reindex()
       end
 
       def page(p)
