@@ -4,13 +4,12 @@
 require 'parslet'
 
 class Parser < Parslet::Parser
-  # Character rules
+  # Characters
   rule(:space)  { match('\s').repeat(1) }
-  rule(:space?) { space.maybe }
-  rule(:quote) { str("\"") || str("\'") }
-  rule(:quote?) { quote.maybe }
+  rule(:quote) { str('"') }
   rule(:separator) { str(':') }
-  rule(:chars) { match(/\w/).repeat(1) }
+  rule(:operator) { (str('+') | str('-')).as(:operator) }
+  rule(:term) { match('[^\s":]').repeat(1).as(:term) }
 
   # Fields
   rule(:title) { str('title') }
@@ -18,17 +17,16 @@ class Parser < Parslet::Parser
   #rule(:identifier) { chars.as(:key) >> separator } # `title:`
   rule(:field) { title | tag }
 
-  # Query string
-  rule(:word) { chars >> space? } # `word`
-  rule(:quoted_word) { quote >> word.repeat(1) >> quote >> space? } # `"two words"` or `'many words here'`
-  #rule(:quoted_word) { (quote >> (word >> ( space | quote )).repeat).repeat(1) }
-  rule(:term) { (word | quoted_word.repeat).as(:phrase) }
-  rule(:subquery) { field.as(:key) >> separator >> term.as(:value) >> space? }
-  rule(:query) { term.repeat }
+  # Compositions
+  rule(:phrase) do
+    (quote >> (term >> space.maybe).repeat >> quote).as(:phrase)
+  end
+  rule(:clause) { (phrase | term).as(:clause) }
+  rule(:subquery) { field.as(:key) >> separator >> clause.as(:value) >> space.maybe }
 
-  rule(:expression) { subquery.repeat(1) }
-
-  root(:expression)
+  # Root
+  rule(:query) { (operator.maybe >> (subquery | clause) >> space.maybe).repeat.as(:query) }
+  root(:query)
 end
 
 class Transformer < Parslet::Transform
@@ -40,9 +38,10 @@ begin
     '"quoted tag" "second" third fourth',
     'title:"quoted tag" tag:"second" tag:fourth',
     'title:"quoted tag" tag:"second" tag:fourth actual search term',
+    'title:"quoted tag" tag:"second" -tag:fourth actual +search -term',
   ]
 
-  parsed = Parser.new.parse(inputs[1])
+  parsed = Parser.new.parse(inputs[3])
   pp parsed
 rescue Parslet::ParseFailed => failure
   puts failure.parse_failure_cause.ascii_tree
