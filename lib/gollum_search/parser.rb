@@ -1,33 +1,30 @@
-require ''
+require 'parslet'
 
 module GollumSearch
   class Parser < Parslet::Parser
-    # def date(input)
-    #   match(/\d{4}-\d{1,2}-\d{1,2}/).as(input)
-    # end
+    # Characters
+    rule(:space)  { match('\s').repeat(1) }
+    rule(:quote) { str('"') }
+    rule(:separator) { str(':') }
+    rule(:operator) { (str('+') | str('-')).as(:operator) } # `+` or `-`
+    rule(:term) { match('[^\s":]').repeat(1).as(:term) } # `word`
 
-    rule(:title_field) do
-      str('title')
+    # Fields
+    rule(:title) { str('title') }
+    rule(:tag) { str('tag') }
+    rule(:content) { str('content') }
+    #rule(:identifier) { chars.as(:key) >> separator } # `title:`
+    rule(:field) { title | tag | content }
+
+    # Compositions
+    rule(:phrase) do
+      (quote >> (term >> space.maybe).repeat >> quote) # `"quoted phrase"`
     end
+    rule(:clause) { (phrase | term) } # `word` or `"quoted phrase"`
+    rule(:subquery) { field.as(:key) >> separator >> clause.as(:value) >> space.maybe } # `title:foo` or `tag:"two words"`
 
-    rule(:tag_field) do
-      str('tag')
-    end
-
-    rule(:value) do
-      (str(',').absent? >> any).repeat
-    end
-
-    rule(:subquery) do
-      (title_field.as(:title_field) | tag_field.as(:tag_field)) >>
-        str(':') >>
-        (range.as(:range) | value.as(:value))
-    end
-
-    rule(:subqueries) do
-      (subquery >> (str(',') >> subquery).repeat(0)).repeat(1).as(:subqueries)
-    end
-
-    root(:subqueries)
+    # Root
+    rule(:query) { (operator.maybe >> (subquery | clause.as(:value)) >> space.maybe).repeat.as(:queries) }
+    root(:query)
   end
 end
