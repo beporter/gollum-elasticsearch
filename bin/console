@@ -8,4 +8,23 @@ require 'gollum_search'
 
 require 'irb'
 require 'irb/completion'
-IRB.start(__FILE__)
+
+# Instantiate a wiki.
+wiki = Gollum::Wiki.new '/app/test/examples/lotr.git'
+
+# Register the hook.
+Gollum::Hook.register(:post_commit, :update_search_index) do |committer, sha1|
+  w = committer.wiki
+  committer.parents[0].commit.diff.deltas.map { |delta| [ delta.new_file[:path], delta.old_file[:path] ] }.flatten.uniq.map { |path| $stderr.puts w.page(path) }
+end
+
+
+# "Edit" a page.
+page = wiki.page('Hobbit.md')
+committer = Gollum::Committer.new(wiki, { :message => 'Editing Hobbit page.', :name => 'Person', :email => 'person@place.com' })
+commit = { :committer => committer }
+
+# This should trigger the post_commit hook code.
+# committed = wiki.update_page(page, page.name, page.format.to_sym, 'Updated page contents', commit)
+
+binding.irb()

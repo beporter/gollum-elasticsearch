@@ -1,4 +1,3 @@
-require 'gollum_search'
 require 'gollum_search/elasticsearch/backend'
 require 'fakes/backend'
 
